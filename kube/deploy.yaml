@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+    name: webserver
+    namespace: pjh
+spec:
+    replicas: 1
+    template:
+        metadata:
+            labels:
+                app: webserver
+        spec:          
+            imagePullSecrets:
+                - name: regcred
+            containers:
+                - image: 10.0.0.255:5000/2022_hybrid-cloud/webserver:v0.1.0
+                  name: webserver
+                  ports:
+                      - containerPort: 9100
+                        protocol: TCP
+                  resources:
+                      limits:
+                          cpu: 100m
+                  imagePullPolicy: Always
+
+            nodeSelector:
+                kubernetes.io/hostname: ketiops-node-1
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: webserver
+    namespace: pjh
+    labels:
+        app: webserver
+spec:
+    type: NodePort
+    ports:
+        - port: 9100
+          name: http
+          protocol: TCP
+          targetPort: 9100
+          nodePort: 32100
+    selector:
+        app: webserver
